@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 from flask import Flask, make_response, jsonify
 from flask_migrate import Migrate
 
@@ -20,19 +18,33 @@ def index():
 
 @app.route('/bakeries')
 def bakeries():
-    return ''
+    all_bakeries = Bakery.query.all()
+    bakery_list = [{'id': bakery.id, 'name': bakery.name, 'created_at': bakery.created_at} for bakery in all_bakeries]
+    return jsonify(bakery_list)
 
 @app.route('/bakeries/<int:id>')
 def bakery_by_id(id):
-    return ''
+    bakery = Bakery.query.get(id)
+    if bakery:
+        bakery_data = {'id': bakery.id, 'name': bakery.name, 'created_at': bakery.created_at}
+        return jsonify(bakery_data)
+    else:
+        return make_response(jsonify({'error': 'Bakery not found'}), 404)
 
 @app.route('/baked_goods/by_price')
 def baked_goods_by_price():
-    return ''
+    all_baked_goods = BakedGood.query.order_by(BakedGood.price.desc()).all()
+    baked_goods_list = [{'id': baked_good.id, 'name': baked_good.name, 'price': baked_good.price, 'created_at': baked_good.created_at} for baked_good in all_baked_goods]
+    return jsonify(baked_goods_list)
 
 @app.route('/baked_goods/most_expensive')
 def most_expensive_baked_good():
-    return ''
+    most_expensive = BakedGood.query.order_by(BakedGood.price.desc()).first()
+    if most_expensive:
+        baked_good_data = {'id': most_expensive.id, 'name': most_expensive.name, 'price': most_expensive.price, 'created_at': most_expensive.created_at}
+        return jsonify(baked_good_data)
+    else:
+        return make_response(jsonify({'error': 'No baked goods found'}), 404)
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
